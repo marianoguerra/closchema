@@ -67,14 +67,15 @@
 
 
 (defmulti validate*
-  "Dispatch on object type for validation. If not implemented, performs only basic type validation."
+  "Dispatch on object type for validation. If not implemented, performs only basic type validation. Users can extend which types are supported by implementing validation for new types."
   (fn [schema instance] (:type schema)))
 
 
-(defn validate [schema instance]
+(defn validate
+  "Entry point. A validation context is created and validation is dispatched to the appropriated multimethod."
+  [schema instance]
   (with-validation-context
     (validate* schema instance)))
-
 
 
 (def default-type "object")

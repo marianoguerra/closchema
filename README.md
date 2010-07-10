@@ -36,4 +36,4 @@ you should know the drill:
 
 TODO
 ====
-The entire spec (http://tools.ietf.org/html/draft-zyp-json-schema-02) is not implemented yet. I'll gradually support to more features when needed.
+The entire spec http://tools.ietf.org/html/draft-zyp-json-schema-02 is not implemented yet. I'll gradually support more features when needed.
