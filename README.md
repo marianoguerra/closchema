@@ -7,23 +7,21 @@ The idea is that it becomes a superset of json schema, to also allow more powerf
 
 
 Examples
-===============
+========== 
 
-(require 'com.intelie.closchema)
-
-
-(validate {:type "array" :items {:type "string"}} ["1" "2"])
-=> true
+        (require 'com.intelie.closchema)
 
 
-(validate {:type "array" :items {:type "string"}} ["1" 2])
-=> false
-
-(report 
-  (validate {:type "array" :items {:type "string"}} ["1" 2 {}]))
-=> '(.. errors )
+        (validate {:type "array" :items {:type "string"}} ["1" "2"])
+        => true
 
 
+        (validate {:type "array" :items {:type "string"}} ["1" 2])
+        => false
+
+        (report 
+          (validate {:type "array" :items {:type "string"}} ["1" 2 {}]))
+          => '(.. errors )
 
 
 
