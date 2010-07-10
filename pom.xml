@@ -7,10 +7,10 @@
   <name>closchema</name>
   <description>Implements the JSON Schema specification.</description>
   <scm>
-    <connection>scm:git:git://github.com/pedroteixeira/closchema.git</connection>
-    <developerConnection>scm:git:ssh://git@github.com/pedroteixeira/closchema.git</developerConnection>
-    <tag>b607ac3c0d0a6080c676ac62ab69e146c381aeb0</tag>
-    <url>http://github.com/pedroteixeira/closchema</url>
+    <connection>scm:git:git://github.com/intelie/closchema.git</connection>
+    <developerConnection>scm:git:ssh://git@github.com/intelie/closchema.git</developerConnection>
+    <tag>438c491388e964876df3797255f95e493d106f9a</tag>
+    <url>http://github.com/intelie/closchema</url>
   </scm>
   <repositories>
     <repository>

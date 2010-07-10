@@ -1,3 +1,0 @@
-clojure library that implements http://json-schema.org/
-
-idea is that it becomes a superset of json schema, to also allow more powerful function-based validation.
