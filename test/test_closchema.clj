@@ -193,3 +193,52 @@
          (not (validate s "foobar"))
          (not (validate s "ar"))))) ) 
  )
+
+ (describe validate "number"
+  (testing "common"
+   (given [s {:type "number"}]
+    (it "should validate if is a number"
+     (and 
+      (validate s 1)
+      (validate s -2)
+      (validate s 3.5)))
+     (it "should not validate if no a number"
+      (not (validate s "2"))))) 
+  (testing "maximum"
+   (given [s {:type '"number" :maximum 5}]
+    (it "should validate if is lower them maximum"
+     (validate s 4))
+    (it "should not validate if not lower or equal maximum"
+     (and 
+      (not (validate s 6))
+       (not (validate s 5)))))) 
+  (testing "minimum"
+   (given [s {:type '"number" :minimum 2}]
+    (it "should validate if is above minimum"
+     (validate s 3))
+    (it "should not validate if not above or equal minimum"
+     (and 
+      (not (validate s 1))
+       (not (validate s 2))))))
+  (testing "maximumCanEqual"
+   (given [s {:type '"number" :maximumCanEqual 5}]
+    (it "should validate if is lower or equal maximum"
+     (and 
+      (validate s 5) 
+     (validate s 4)))
+    (it "should not validate if not lower nor equal maximum"
+     (not (validate s 6))))) 
+  (testing "minimumCanEqual"
+   (given [s {:type '"number" :minimumCanEqual 2}]
+    (it "should validate if is above or equal minimum"
+     (and 
+      (validate s 3)
+      (validate s 2)))
+    (it "should not validate if not above nor equal minimum"
+       (not (validate s 1)))))
+    (testing "disivibleBy"
+     (given [s {:type "number" :divisibleBy 2}]
+      (it "shoud validate if number is divisible by"
+       (validate s 4))
+      (it "should not validate if number it not divisible by"
+       (not (validate s 5))))))

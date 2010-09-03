@@ -219,12 +219,22 @@
 (defmethod validate* "number"
   [schema instance]
   (common-validate schema instance)
-    ;minimum
-    ;maximum
-    ;miniumCanEqual
-    ;maximumCanEqual
-    ;divisibleBy
- )
+  (when (schema :maximum)
+   (if-not (> (schema :maximum) instance)
+    (invalid :value-lower-them-maximum {:maximum (schema :maximum) :value instance }))) 
+  (when (schema :minimum)
+   (if-not (< (schema :minimum) instance)
+    (invalid :value-lower-them-minimum {:minimum (schema :minimum) :value instance }))) 
+  (when (schema :maximumCanEqual)
+   (if-not (>= (schema :maximumCanEqual) instance)
+    (invalid :value-lower-them-maximumCanEqual {:maximumCanEqual (schema :maximumCanEqual) :value instance }))) 
+  (when (schema :minimumCanEqual)
+   (if-not (<= (schema :minimumCanEqual) instance)
+    (invalid :value-lower-them-minimumCanEqual {:minimumCanEqual (schema :minimumCanEqual) :value instance }))) 
+  (when (schema :divisibleBy)
+   (if-not (= 0 (mod instance (schema :divisibleBy)))
+    (invalid :value-not-divisible-by {:divisibleBy (schema :divisibleBy) :value instance}))) 
+  )
 
 
 
