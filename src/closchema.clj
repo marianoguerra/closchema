@@ -92,7 +92,7 @@
        "string" #(string? %)
        "number" #(number? %)
        "integer" #(integer? %)
-       "boolean" #(instance? Boolean %)       
+       "boolean" #(instance? Boolean %)
        "null" #(nil? %)
        "any" (fn [] true)})
 
@@ -201,23 +201,26 @@
 (defmethod validate* "string"
   [schema instance]
   (common-validate schema instance)
-;minLength
-;maxLength
-;pattern  
+  (when (schema :maxLength)
+   (if-not (>= (schema :maxLength) (count instance))
+    (invalid :max-length-exceeded {:maxLength (schema :maxLength) :actual (count instance) }))) 
+  (when (schema :minLength)
+    (if-not (<= (schema :minLength) (count instance))
+    (invalid :min-length-not-reached {:minLength (schema :minLength) :actual (count instance) }))) 
+  ;pattern  
+  ;enum
   )
 
 
 (defmethod validate* "number"
   [schema instance]
   (common-validate schema instance)
-  (comment
-    minimum
-    maximum
-    miniumCanEqual
-    maximumCanEqual
-    divisibleBy
-    )
-  )
+    ;minimum
+    ;maximum
+    ;miniumCanEqual
+    ;maximumCanEqual
+    ;divisibleBy
+ )
 
 
 

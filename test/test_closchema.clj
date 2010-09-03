@@ -1,6 +1,6 @@
 (ns test-closchema
-  (:use closchema
-	lazytest.describe))  
+ (:use [closchema] :reload-all) 
+ (:use lazytest.describe))  
 
 (comment
 (defmacro
@@ -48,7 +48,19 @@
       (it "should enforce that all extra properties conform to the schema"
         (and 
          (validate s {:id 1 :name "wine" :age "13 years" :country "france"})
-         (not (validate s {:id 1 :name "wine" :age 13}))))))))
+         (not (validate s {:id 1 :name "wine" :age 13})))))))
+
+ (testing "with required fields"
+  (given [s (assoc base-schema :properties (merge (base-schema :properties) 
+                                  {:address  {:type "string" :optional true}
+                                   :address2 {:type "string" :requires "address" :optional true}}))]
+    (it "should validate with non-required"
+     (validate s {:id 1 :name "john" :address "street"}) )
+    (it "should validate when both are present"
+     (validate s {:id 1 :name "john" :address "street" :address2 "country"}) )
+    (it "should not validate nem required is not present"
+     (not (validate s {:id 1 :name "john" :address2 "country"})))) )
+ )
 
  
 
@@ -130,4 +142,33 @@
         (it "of type numbers" (not (validate s [1 2 3])))
         (it "of type strings" (not (validate s ["a" "b"])))
         (it "of type objects" (not (validate s [{:a 1} {:b 1} {:a 1}])))))))))
-  
+
+
+(describe validate "string"
+ (testing "with common string"
+  (given [s {:type "string"}] 
+      (it "should validate with string"
+       (validate s "foobar")))) 
+ (testing "with mininum only"
+  (given [s {:type "string" :minLength 3}] 
+      (it "should validate if within the lengths"
+        (validate s "foobar")) 
+      (it "should not validate if not within the lengths"
+        (not (validate s "fo"))))) 
+ (testing "with maxinum only"
+  (given [s {:type "string" :maxLength 5}] 
+      (it "should validate if within the lengths"
+       (validate s "fooba")) 
+      (it "should not validate if not within the lengths"
+       (not (validate s "foobar"))))) 
+ (testing "with mininum and maxinum"
+  (given [s {:type "string" :maxLength 5 :minLength 3}] 
+      (it "should validate if within the lengths"
+       (and 
+        (validate s "foo")
+        (validate s "fooba")) )
+      (it "should not validate if not within the lengths"
+       (and 
+           (not (validate s "fo"))
+           (not (validate s "foobar"))))) )
+ )
