@@ -171,4 +171,25 @@
        (and 
            (not (validate s "fo"))
            (not (validate s "foobar"))))) )
+ (testing "pattern"
+  (given [s {:type "string" :pattern "^[a-zA-Z0-9]+$"}]
+   (it "should validate if pattern matches"
+       (and 
+        (validate s "fooBar")
+        (validate s "fooBar123")
+        (validate s "123fooBar")))
+   (it "should not validate if pattern dont match"
+       (and 
+        (not  (validate s "foo-Bar"))
+        (not (validate s "foo_bar")))))) 
+ (testing "enum"
+   (given [s {:type "string" :enum ["foo" "bar"] }]
+    (it "should validate if string is in enum"
+     (and 
+         (validate s "foo")
+         (validate s "bar")))
+    (it "should not validate if string is not in enum"
+     (and  
+         (not (validate s "foobar"))
+         (not (validate s "ar"))))) ) 
  )

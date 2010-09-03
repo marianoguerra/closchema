@@ -207,8 +207,12 @@
   (when (schema :minLength)
     (if-not (<= (schema :minLength) (count instance))
     (invalid :min-length-not-reached {:minLength (schema :minLength) :actual (count instance) }))) 
-  ;pattern  
-  ;enum
+  (when (schema :pattern)
+   (if-not (.matches instance (schema :pattern))
+    (invalid :pattern-not-matched {:pattern (schema :pattern) :actual instance})))
+  (when (schema :enum)
+   (if-not (true? (some #(= % instance) (schema :enum)))
+    (invalid :value-not-in-enum {:enum (schema :enum) :value instance }))) 
   )
 
 
