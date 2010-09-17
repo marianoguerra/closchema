@@ -9,9 +9,23 @@
   <scm>
     <connection>scm:git:git://github.com/intelie/closchema.git</connection>
     <developerConnection>scm:git:ssh://git@github.com/intelie/closchema.git</developerConnection>
-    <tag>0f41154c0114d19c8c85fb7b331024398f74ac7b</tag>
+    <tag>6e35d23ee1ccdecb039517584d2cca04c4e1972b</tag>
     <url>http://github.com/intelie/closchema</url>
   </scm>
+  <build>
+    <sourceDirectory>src</sourceDirectory>
+    <testSourceDirectory>test</testSourceDirectory>
+    <resources>
+      <resource>
+        <directory>resources</directory>
+      </resource>
+    </resources>
+    <testResources>
+      <testResource>
+        <directory>test-resources</directory>
+      </testResource>
+    </testResources>
+  </build>
   <repositories>
     <repository>
       <id>stuartsierra.com</id>
@@ -38,12 +52,12 @@
     <dependency>
       <groupId>org.clojure</groupId>
       <artifactId>clojure</artifactId>
-      <version>1.2.0-master-SNAPSHOT</version>
+      <version>1.2.0</version>
     </dependency>
     <dependency>
       <groupId>org.clojure</groupId>
       <artifactId>clojure-contrib</artifactId>
-      <version>1.2.0-SNAPSHOT</version>
+      <version>1.2.0</version>
     </dependency>
     <dependency>
       <groupId>com.stuartsierra</groupId>
