@@ -9,7 +9,7 @@
   <scm>
     <connection>scm:git:git://github.com/intelie/closchema.git</connection>
     <developerConnection>scm:git:ssh://git@github.com/intelie/closchema.git</developerConnection>
-    <tag>6e35d23ee1ccdecb039517584d2cca04c4e1972b</tag>
+    <tag>dc28740097fee4a8b3c539c5e5a5523aad298774</tag>
     <url>http://github.com/intelie/closchema</url>
   </scm>
   <build>
@@ -29,7 +29,7 @@
   <repositories>
     <repository>
       <id>stuartsierra.com</id>
-      <url>http://stuartsierra.com/m2snapshots</url>
+      <url>http://stuartsierra.com/maven2</url>
     </repository>
     <repository>
       <id>central</id>
@@ -62,7 +62,7 @@
     <dependency>
       <groupId>com.stuartsierra</groupId>
       <artifactId>lazytest</artifactId>
-      <version>1.0.0-SNAPSHOT</version>
+      <version>1.1.2</version>
     </dependency>
   </dependencies>
 </project>

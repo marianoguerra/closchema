@@ -68,7 +68,10 @@
 
 (defmulti validate*
   "Dispatch on object type for validation. If not implemented, performs only basic type validation. Users can extend which types are supported by implementing validation for new types."
-  (fn [schema instance] (:type schema)))
+  (fn [schema instance]
+    (if (:enum schema)
+      "enum"
+      (:type schema))))
 
 
 (defn validate
@@ -80,7 +83,7 @@
 
 (def default-type "object")
 
-
+ 
 (defmethod validate* nil [schema instance]
   (validate (merge schema {:type default-type}) instance))
 
@@ -137,6 +140,7 @@
   
 
   #_ "validate instance properties (using invidivual or addicional schema)"
+  
   (doseq [[property-name property] instance]
     (if-let [{requires :requires :as property-schema}
              (or (and (map? properties-schema) (properties-schema property-name))
@@ -201,19 +205,23 @@
 (defmethod validate* "string"
   [schema instance]
   (common-validate schema instance)
+
   (when (schema :maxLength)
-   (if-not (>= (schema :maxLength) (count instance))
-    (invalid :max-length-exceeded {:maxLength (schema :maxLength) :actual (count instance) }))) 
+    (if-not (>= (schema :maxLength) (count instance))
+      (invalid :max-length-exceeded {:maxLength (schema :maxLength) :actual (count instance) }))) 
+
   (when (schema :minLength)
     (if-not (<= (schema :minLength) (count instance))
-    (invalid :min-length-not-reached {:minLength (schema :minLength) :actual (count instance) }))) 
+      (invalid :min-length-not-reached {:minLength (schema :minLength) :actual (count instance) }))) 
+
   (when (schema :pattern)
-   (if-not (.matches instance (schema :pattern))
-    (invalid :pattern-not-matched {:pattern (schema :pattern) :actual instance})))
-  (when (schema :enum)
-   (if-not (true? (some #(= % instance) (schema :enum)))
-    (invalid :value-not-in-enum {:enum (schema :enum) :value instance }))) 
-  )
+    (if-not (.matches instance (schema :pattern))
+      (invalid :pattern-not-matched {:pattern (schema :pattern) :actual instance}))))
+
+(defmethod validate* "enum"
+  [schema instance]
+  (if-not (true? (some #(= % instance) (schema :enum)))
+    (invalid :value-not-in-enum {:enum (schema :enum) :value instance })))
 
 
 (defmethod validate* "number"
@@ -221,16 +229,20 @@
   (common-validate schema instance)
   (when (schema :maximum)
    (if-not (> (schema :maximum) instance)
-    (invalid :value-lower-them-maximum {:maximum (schema :maximum) :value instance }))) 
+    (invalid :value-lower-them-maximum {:maximum (schema :maximum) :value instance })))
+  
   (when (schema :minimum)
    (if-not (< (schema :minimum) instance)
-    (invalid :value-lower-them-minimum {:minimum (schema :minimum) :value instance }))) 
+    (invalid :value-lower-them-minimum {:minimum (schema :minimum) :value instance })))
+  
   (when (schema :maximumCanEqual)
    (if-not (>= (schema :maximumCanEqual) instance)
-    (invalid :value-lower-them-maximumCanEqual {:maximumCanEqual (schema :maximumCanEqual) :value instance }))) 
+    (invalid :value-lower-them-maximumCanEqual {:maximumCanEqual (schema :maximumCanEqual) :value instance })))
+  
   (when (schema :minimumCanEqual)
    (if-not (<= (schema :minimumCanEqual) instance)
-    (invalid :value-lower-them-minimumCanEqual {:minimumCanEqual (schema :minimumCanEqual) :value instance }))) 
+    (invalid :value-lower-them-minimumCanEqual {:minimumCanEqual (schema :minimumCanEqual) :value instance })))
+  
   (when (schema :divisibleBy)
    (if-not (= 0 (mod instance (schema :divisibleBy)))
     (invalid :value-not-divisible-by {:divisibleBy (schema :divisibleBy) :value instance}))) 
