@@ -103,12 +103,16 @@
 (defn check-basic-type
   "Validate basic type definition for known types."
   [{t :type :as schema} instance]
-  (let [t (or t default-type)
-        types (if (coll? t) t (vector t))]
-    
-    (or (reduce #(or %1 %2)
-                (map (fn [t] ((basic-type-validations t) instance)) types))
-        (invalid :type {:expected types :actual (type instance)}))))
+
+  
+  (if (and (nil? instance) (:optional schema))
+    true
+  
+    (let [t (or t default-type)
+          types (if (coll? t) t (vector t))]
+      (or (reduce #(or %1 %2)
+                  (map (fn [t] ((basic-type-validations t) instance)) types))
+          (invalid :type {:expected types :actual (type instance)})))))
 
 
 (defn common-validate [schema instance]
@@ -149,9 +153,12 @@
         (when (and requires property
                    (not (get instance (keyword requires))))
           (invalid requires :required {:required-by property-name}))
-      
-        (walk-in instance property-name
-                 (validate property-schema property)))))
+
+
+        (when-not (and (:optional :property-schema) (nil? instance))
+        
+          (walk-in instance property-name
+                   (validate property-schema property))))))
 
     
   #_ "check additional properties"

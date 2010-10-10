@@ -9,7 +9,7 @@
   <scm>
     <connection>scm:git:git://github.com/intelie/closchema.git</connection>
     <developerConnection>scm:git:ssh://git@github.com/intelie/closchema.git</developerConnection>
-    <tag>dc28740097fee4a8b3c539c5e5a5523aad298774</tag>
+    <tag>2cb806891f74982b37d576d35c6e91a772700aa6</tag>
     <url>http://github.com/intelie/closchema</url>
   </scm>
   <build>

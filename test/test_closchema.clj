@@ -23,7 +23,10 @@
         (not (validate s {:id 1})))
       
       (it "should not accept when property type is incorrect"
-        (not (validate s {:id "1" :name "bag"})))))
+        (not (validate s {:id "1" :name "bag"})))
+
+      (it "should accept an optional property with value null"
+        (validate s {:id 1 :name "test" :description nil}))))
   
   
   (testing "with additional properties schema"
