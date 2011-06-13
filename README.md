@@ -31,7 +31,7 @@ you should know the drill:
 
 	lein install
 	lein swank 
-	./autotest.sh
+	./test.sh
 
 
 TODO
