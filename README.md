@@ -3,13 +3,14 @@ Closchema
 
 A clojure library that implements http://json-schema.org/.
 
-The idea is that it becomes a superset of json schema, to also allow more powerful function-based validation.
+The idea is that it becomes a superset of json schema, to also allow
+more powerful function-based validation.
 
 
 Examples
 ==========
 
-        (require 'com.intelie.closchema)
+        (require 'com.bigml.closchema)
 
 
         (validate {:type "array" :items {:type "string"}} ["1" "2"])
@@ -36,4 +37,6 @@ you should know the drill:
 
 TODO
 ====
-The entire spec http://tools.ietf.org/html/draft-zyp-json-schema-03 is not implemented yet. I'll gradually support more features when needed.
+
+The entire spec http://tools.ietf.org/html/draft-zyp-json-schema-03 is
+not implemented yet. We'll gradually support more features when needed.
