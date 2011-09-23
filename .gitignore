@@ -3,3 +3,4 @@ lib
 .emacs.desktop
 /pom.xml
 /classes/
+/.lein-failures

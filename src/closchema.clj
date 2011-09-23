@@ -1,34 +1,32 @@
 (ns closchema
   "This is JSON Schema in Clojure. See http://tools.ietf.org/html/draft-zyp-json-schema-02
  Main purposed is to allow object validation, but schema metadata can be used for exposing contracts as well."
-  (:use clojure.walk
-        clojure.template
-        clojure.contrib.condition
-        (clojure.contrib [ns-utils :only (immigrate)]))
+  (:use clojure.walk clojure.template)
   (:require [clojure.set :as set]))
 
 
-(def ^{:doc "Allow validation errors to be captured."}
+(def ^{:doc "Allow validation errors to be captured." :dynamic true}
      *validation-context* nil)
 
-(def ^{:doc "When walking an object, we keep a binding to current parent."}
+(def ^{:doc "When walking an object, we keep a binding to current parent."
+       :dynamic true}
      *parent* nil)
 
 
 (defn process-errors
   "Default processing just outputs a boolean return."
-  [errors]  
+  [errors]
   (= (count errors) 0))
 
 
-(defmacro with-validation-context  
+(defmacro with-validation-context
   "Defines a binding to allow access to the root object and to enable invalidations to be captured. This strategy removes the need of raising exceptions at every single invalid point, and allows context information to be used when reporting about errors. Nested contexts are just ignored."
-  [& body]  
+  [& body]
   `(let [body# #(do ~@body
                     (process-errors @(:errors *validation-context*)))]
-     (if-not *validation-context*  
+     (if-not *validation-context*
        (binding [*validation-context* {:errors (ref '())
-                                   :path (ref [])}]                  
+                                   :path (ref [])}]
          (body#))
        (body#))))
 
@@ -38,7 +36,7 @@
   [parent rel-path & body]
   `(binding [*parent* ~parent]
      (if-let [{path# :path} *validation-context*]
-       (do 
+       (do
          (dosync alter path# conj ~rel-path)
          ~@body
          (dosync alter path# pop))
@@ -50,7 +48,7 @@
   [& args]
   (let [[path args] (if (keyword? (first args)) [nil args] [(first args) (rest args)])
         key (first args)
-        data (second args)] 
+        data (second args)]
     `(let [error# {:ref ~path :key ~key :data ~data}]
        (if-let [{errors# :errors path# :path} *validation-context*]
          (dosync (alter errors# conj
@@ -62,7 +60,7 @@
   "Returns all errors, instead of simple boolean."
   [& args]
   `(binding [process-errors (fn [errors#] errors#)]
-     (with-validation-context    
+     (with-validation-context
        (do ~@args))))
 
 
@@ -83,7 +81,7 @@
 
 (def default-type "object")
 
- 
+
 (defmethod validate* nil [schema instance]
   (validate (merge schema {:type default-type}) instance))
 
@@ -104,10 +102,10 @@
   "Validate basic type definition for known types."
   [{t :type :as schema} instance]
 
-  
+
   (if (and (nil? instance) (:optional schema))
     true
-  
+
     (let [t (or t default-type)
           types (if (coll? t) t (vector t))]
       (or (reduce #(or %1 %2)
@@ -137,36 +135,36 @@
 
   #_ "validate properties defined in schema"
   (doseq [[property-name
-           {optional :optional :as property-schema}] properties-schema]    
+           {optional :optional :as property-schema}] properties-schema]
     (let [property (get instance property-name)]
       (when-not (or property optional)
-        (invalid property-name :required)))) 
-  
+        (invalid property-name :required))))
+
 
   #_ "validate instance properties (using invidivual or addicional schema)"
-  
+
   (doseq [[property-name property] instance]
     (if-let [{requires :requires :as property-schema}
              (or (and (map? properties-schema) (properties-schema property-name))
                  (and (map? additional-schema) additional-schema))]
-      (do        
+      (do
         (when (and requires property
                    (not (get instance (keyword requires))))
           (invalid requires :required {:required-by property-name}))
 
 
         (when-not (and (:optional :property-schema) (nil? instance))
-        
+
           (walk-in instance property-name
                    (validate property-schema property))))))
 
-    
+
   #_ "check additional properties"
   (when (false? additional-schema)
     (if-let [additionals (set/difference (set (keys instance))
                                       (set (keys properties-schema)))]
       (when (> (count additionals) 0)
-        (invalid :addicional-properties-not-allowed {:properties additionals}))))) 
+        (invalid :addicional-properties-not-allowed {:properties additionals})))))
 
 
 
@@ -174,17 +172,17 @@
 (defmethod validate* "array"
   [{items-schema :items
     unique? :uniqueItems :as schema} instance]
-  
+
   (common-validate schema instance)
 
   #_ "specific array validation"
   (let [total (count instance)]
     (do-template
-     [key op]     
+     [key op]
      (if-let [expected (key schema)]
        (when (and (op total expected))
          (invalid key {:expected expected :actual total}))
-       
+
        :minItems <
        :maxItems >)))
 
@@ -192,15 +190,15 @@
     (reduce (fn [l r] (when-not (= l r)
                         (invalid :uniqueItems {:l l :r r}))
               r) instance))
-  
-  
-  #_ "treat array as object for further common validation" 
+
+
+  #_ "treat array as object for further common validation"
   (when items-schema
     (let [obj-array (zipmap (range (count instance)) instance)
           obj-schema (cond (and (map? items-schema)(:type items-schema))
                            {:type "object"
                             :additionalProperties items-schema}
-                           
+
                            (coll? items-schema)
                            (merge schema {:type "object"
                                           :properties (zipmap (range (count items-schema)) items-schema)}))]
@@ -215,11 +213,11 @@
 
   (when (schema :maxLength)
     (if-not (>= (schema :maxLength) (count instance))
-      (invalid :max-length-exceeded {:maxLength (schema :maxLength) :actual (count instance) }))) 
+      (invalid :max-length-exceeded {:maxLength (schema :maxLength) :actual (count instance) })))
 
   (when (schema :minLength)
     (if-not (<= (schema :minLength) (count instance))
-      (invalid :min-length-not-reached {:minLength (schema :minLength) :actual (count instance) }))) 
+      (invalid :min-length-not-reached {:minLength (schema :minLength) :actual (count instance) })))
 
   (when (schema :pattern)
     (if-not (.matches instance (schema :pattern))
@@ -237,22 +235,22 @@
   (when (schema :maximum)
    (if-not (> (schema :maximum) instance)
     (invalid :value-lower-them-maximum {:maximum (schema :maximum) :value instance })))
-  
+
   (when (schema :minimum)
    (if-not (< (schema :minimum) instance)
     (invalid :value-lower-them-minimum {:minimum (schema :minimum) :value instance })))
-  
+
   (when (schema :maximumCanEqual)
    (if-not (>= (schema :maximumCanEqual) instance)
     (invalid :value-lower-them-maximumCanEqual {:maximumCanEqual (schema :maximumCanEqual) :value instance })))
-  
+
   (when (schema :minimumCanEqual)
    (if-not (<= (schema :minimumCanEqual) instance)
     (invalid :value-lower-them-minimumCanEqual {:minimumCanEqual (schema :minimumCanEqual) :value instance })))
-  
+
   (when (schema :divisibleBy)
    (if-not (= 0 (mod instance (schema :divisibleBy)))
-    (invalid :value-not-divisible-by {:divisibleBy (schema :divisibleBy) :value instance}))) 
+    (invalid :value-not-divisible-by {:divisibleBy (schema :divisibleBy) :value instance})))
   )
 
 
