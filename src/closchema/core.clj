@@ -1,4 +1,4 @@
-(ns closchema
+(ns closchema.core
   "This is JSON Schema in Clojure. See http://tools.ietf.org/html/draft-zyp-json-schema-02
  Main purposed is to allow object validation, but schema metadata can be used for exposing contracts as well."
   (:use clojure.walk clojure.template)
@@ -56,7 +56,7 @@
        (process-errors (list error#)))))
 
 
-(defmacro report
+(defmacro report-errors
   "Returns all errors, instead of simple boolean."
   [& args]
   `(binding [process-errors (fn [errors#] errors#)]
