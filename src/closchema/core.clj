@@ -13,10 +13,9 @@
      *parent* nil)
 
 
-(defn process-errors
-  "Default processing just outputs a boolean return."
-  [errors]
-  (= (count errors) 0))
+(def ^{:doc "Default processing just outputs a boolean return." :dynamic true}
+  process-errors
+  (fn [errors] (= (count errors) 0)))
 
 
 (defmacro with-validation-context
