@@ -96,6 +96,26 @@
     (is (not (validate s ["a" "b"])) "of type strings")
     (is (not (validate s [{:a 1} {:b 1} {:a 1}])) "of type objects")))
 
+(deftest validate-items-with-bounds
+  (let [s1 {:type "array" :minItems 2 :items {:type "number"}}
+        s2 {:type "array" :maxItems 4 :items {:type "number"}}
+        s11 {:type "array" :minItems 2 :maxItems 2 :items {:type "string"}}
+        s12 (merge s1 s2)]
+    (is (validate s1 [1 2]) "minimum length")
+    (is (validate s12 [1 2]) "minimum length")
+    (is (validate s11 ["1" "2"]) "minimum length")
+    (is (validate s2 []) "minimum length")
+    (is (not (validate s1 [1])) "minimum length")
+    (is (not (validate s12 [1])) "minimum length")
+    (is (not (validate s11 ["3"])) "minimum length")
+    (is (validate s1 [1 2 3 4 5]) "maximum length")
+    (is (validate s12 [1 2 3]) "maximum length")
+    (is (validate s11 ["1" "2"]) "maximum length")
+    (is (validate s2 []) "maximum length")
+    (is (not (validate s2 [1 3 4 5 6 7])) "maximum length")
+    (is (not (validate s12 [1 2 3 4 5])) "maximum length")
+    (is (not (validate s11 ["1" "2" "3"])) "maximum length")))
+
 (deftest validate-common-string
   (let [s {:type "string"}]
     (is (validate s "foobar") "should validate with string")))

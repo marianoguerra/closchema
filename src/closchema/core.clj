@@ -176,14 +176,12 @@
 
   #_ "specific array validation"
   (let [total (count instance)]
-    (do-template
-     [key op]
-     (if-let [expected (key schema)]
-       (when (and (op total expected))
-         (invalid key {:expected expected :actual total}))
-
-       :minItems <
-       :maxItems >)))
+    (do-template [key op]
+                 (if-let [expected (key schema)]
+                   (when (op total expected)
+                     (invalid key {:expected expected :actual total})))
+                 :minItems <
+                 :maxItems >))
 
   (if-let [unique? (:uniqueItems schema)]
     (reduce (fn [l r] (when-not (= l r)
@@ -251,6 +249,3 @@
    (if-not (= 0 (mod instance (schema :divisibleBy)))
     (invalid :value-not-divisible-by {:divisibleBy (schema :divisibleBy) :value instance})))
   )
-
-
-
