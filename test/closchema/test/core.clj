@@ -181,3 +181,13 @@
   (let [s {:type "number" :divisibleBy 2}]
     (is (validate s 4) "number is divisible by 2")
     (is (not (validate s 5)) "if number it not divisible by 2")))
+
+(deftest validate-booleans
+  (let [s {:type "boolean"}]
+    (is (validate s false))
+    (is (validate s true))
+    (is (not (validate s "2"))))
+  (let [s {:type "object" :properties {:header {:type "boolean"}}}]
+    (is (validate s {:header true}))
+    (is (validate s {:header false}))
+    (is (not (validate s {:header 42})))))

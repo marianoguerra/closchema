@@ -71,6 +71,7 @@
       (:type schema))))
 
 
+
 (defn validate
   "Entry point. A validation context is created and validation is dispatched to the appropriated multimethod."
   [schema instance]
@@ -102,23 +103,19 @@
   [{t :type :as schema} instance]
 
 
-  (if (and (nil? instance) (:optional schema))
-    true
-
-    (let [t (or t default-type)
-          types (if (coll? t) t (vector t))]
-      (or (reduce #(or %1 %2)
-                  (map (fn [t] ((basic-type-validations t) instance)) types))
-          (invalid :type {:expected types :actual (type instance)})))))
+  (or (and (nil? instance) (:optional schema))
+      (let [t (or t default-type)
+            types (if (coll? t) t (vector t))]
+        (or (reduce #(or %1 %2)
+                    (map (fn [t] ((basic-type-validations t) instance)) types))
+            (invalid :type {:expected types :actual (type instance)})))))
 
 
 (defn common-validate [schema instance]
   (check-basic-type schema instance)
-
   (comment TODO
            disallow
-           extends)
-  )
+           extends))
 
 
 (defmethod validate* :default [schema instance]
@@ -136,7 +133,7 @@
   (doseq [[property-name
            {optional :optional :as property-schema}] properties-schema]
     (let [property (get instance property-name)]
-      (when-not (or property optional)
+      (when-not (or (not (nil? property)) optional)
         (invalid property-name :required))))
 
 
@@ -148,7 +145,7 @@
                  (and (map? additional-schema) additional-schema))]
       (do
         (when (and requires property
-                   (not (get instance (keyword requires))))
+                   (nil? (get instance (keyword requires))))
           (invalid requires :required {:required-by property-name}))
 
 
