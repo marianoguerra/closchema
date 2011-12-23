@@ -108,7 +108,8 @@
             types (if (coll? t) t (vector t))]
         (or (reduce #(or %1 %2)
                     (map (fn [t] ((basic-type-validations t) instance)) types))
-            (invalid :type {:expected types :actual (type instance)})))))
+            (invalid :type {:expected (map str types)
+                            :actual (str (type instance))})))))
 
 
 (defn common-validate [schema instance]
