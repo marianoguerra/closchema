@@ -152,26 +152,26 @@
     (is (not (validate s "2")) "not a number")))
 
 (deftest validate-max-number
-  (let [s {:type '"number" :maximum 5}]
+  (let [s {:type '"number" :exclusiveMaximum 5}]
     (is (validate s 4) "lower than maximum")
     (is (and (not (validate s 6)) (not (validate s 5)))
-        "greater than maximum")))
+        "greater or equal than maximum")))
 
 (deftest validate-min-number
-  (let [s {:type '"number" :minimum 2}]
+  (let [s {:type '"number" :exclusiveMinimum 2}]
     (is (validate s 3) "above minimum")
     (is (and (not (validate s 1)) (not (validate s 2)))
-        "not above or equal minimum")))
+        "less or equal than minimum")))
 
-(deftest validate-max-equal-number
-  (let [s {:type '"number" :maximumCanEqual 5}]
+(deftest validate-max-number
+  (let [s {:type '"number" :maximum 5}]
     (is (and (validate s 5) (validate s 4))
         "should validate if is lower or equal maximum")
     (is (not (validate s 6))
         "should not validate if not lower nor equal maximum")))
 
-(deftest validate-min-equal-number
-  (let [s {:type '"number" :minimumCanEqual 2}]
+(deftest validate-min-number
+  (let [s {:type '"number" :minimum 2}]
     (is (and (validate s 3) (validate s 2))
         "should validate if is above or equal minimum")
     (is (not (validate s 1))

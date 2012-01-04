@@ -228,22 +228,26 @@
   [schema instance]
   (common-validate schema instance)
   (when (schema :maximum)
-   (if-not (> (schema :maximum) instance)
-    (invalid :value-lower-them-maximum {:maximum (schema :maximum) :value instance })))
+    (if-not (>= (schema :maximum) instance)
+      (invalid :value-greater-then-maximum
+               {:maximum (schema :maximum) :value instance })))
 
   (when (schema :minimum)
-   (if-not (< (schema :minimum) instance)
-    (invalid :value-lower-them-minimum {:minimum (schema :minimum) :value instance })))
+    (if-not (<= (schema :minimum) instance)
+      (invalid :value-lower-then-minimum
+               {:minimum (schema :minimum) :value instance })))
 
-  (when (schema :maximumCanEqual)
-   (if-not (>= (schema :maximumCanEqual) instance)
-    (invalid :value-lower-them-maximumCanEqual {:maximumCanEqual (schema :maximumCanEqual) :value instance })))
+  (when (schema :exclusiveMaximum)
+    (if-not (> (schema :exclusiveMaximum) instance)
+      (invalid :value-greater-or-equal-then-maximum
+               {:exclusiveMaximum (schema :exclusiveMaximum) :value instance })))
 
-  (when (schema :minimumCanEqual)
-   (if-not (<= (schema :minimumCanEqual) instance)
-    (invalid :value-lower-them-minimumCanEqual {:minimumCanEqual (schema :minimumCanEqual) :value instance })))
+  (when (schema :exclusiveMinimum)
+    (if-not (< (schema :minimumCanEqual) instance)
+      (invalid :value-lower-or-equal-then-minimum
+               {:exclusiveMinimum (schema :exclusiveMinimum) :value instance })))
 
   (when (schema :divisibleBy)
-   (if-not (= 0 (mod instance (schema :divisibleBy)))
-    (invalid :value-not-divisible-by {:divisibleBy (schema :divisibleBy) :value instance})))
-  )
+    (if-not (= 0 (mod instance (schema :divisibleBy)))
+      (invalid :value-not-divisible-by
+               {:divisibleBy (schema :divisibleBy) :value instance}))))
