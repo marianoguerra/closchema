@@ -1,6 +1,8 @@
 (ns closchema.core
-  "This is JSON Schema in Clojure. See http://tools.ietf.org/html/draft-zyp-json-schema-02
- Main purposed is to allow object validation, but schema metadata can be used for exposing contracts as well."
+  "This is JSON Schema in Clojure. See
+   http://tools.ietf.org/html/draft-zyp-json-schema-02 Main purposed
+   is to allow object validation, but schema metadata can be used for
+   exposing contracts as well."
   (:use clojure.walk clojure.template)
   (:require [clojure.set :as set]))
 
@@ -19,7 +21,11 @@
 
 
 (defmacro with-validation-context
-  "Defines a binding to allow access to the root object and to enable invalidations to be captured. This strategy removes the need of raising exceptions at every single invalid point, and allows context information to be used when reporting about errors. Nested contexts are just ignored."
+  "Defines a binding to allow access to the root object and to enable
+   invalidations to be captured. This strategy removes the need of
+   raising exceptions at every single invalid point, and allows
+   context information to be used when reporting about errors. Nested
+   contexts are just ignored."
   [& body]
   `(let [body# #(do ~@body
                     (process-errors @(:errors *validation-context*)))]
@@ -31,7 +37,8 @@
 
 
 (defmacro walk-in
-  "Step inside a relative path, from a previous object. This information is useful for reporting."
+  "Step inside a relative path, from a previous object. This
+   information is useful for reporting."
   [parent rel-path & body]
   `(binding [*parent* ~parent]
      (if-let [{path# :path} *validation-context*]
@@ -45,7 +52,8 @@
 (defmacro invalid
   "Register an invalid piece of data according to schema."
   [& args]
-  (let [[path args] (if (keyword? (first args)) [nil args] [(first args) (rest args)])
+  (let [[path args] (if (keyword? (first args))
+                      [nil args] [(first args) (rest args)])
         key (first args)
         data (second args)]
     `(let [error# {:ref ~path :key ~key :data ~data}]
@@ -64,7 +72,9 @@
 
 
 (defmulti validate*
-  "Dispatch on object type for validation. If not implemented, performs only basic type validation. Users can extend which types are supported by implementing validation for new types."
+  "Dispatch on object type for validation. If not implemented,
+   performs only basic type validation. Users can extend which types
+   are supported by implementing validation for new types."
   (fn [schema instance]
     (if (:enum schema)
       "enum"
@@ -73,7 +83,8 @@
 
 
 (defn validate
-  "Entry point. A validation context is created and validation is dispatched to the appropriated multimethod."
+  "Entry point. A validation context is created and validation is
+   dispatched to the appropriated multimethod."
   [schema instance]
   (with-validation-context
     (validate* schema instance)))
@@ -107,7 +118,8 @@
       (let [t (or t default-type)
             types (if (coll? t) t (vector t))]
         (or (reduce #(or %1 %2)
-                    (map (fn [t] ((basic-type-validations t) instance)) types))
+                    (map (fn [t] ((basic-type-validations t) instance))
+                         types))
             (invalid :type {:expected (map str types)
                             :actual (str (type instance))})))))
 
@@ -161,7 +173,8 @@
     (if-let [additionals (set/difference (set (keys instance))
                                       (set (keys properties-schema)))]
       (when (> (count additionals) 0)
-        (invalid :addicional-properties-not-allowed {:properties additionals})))))
+        (invalid :addicional-properties-not-allowed
+                 {:properties additionals})))))
 
 
 
@@ -190,13 +203,16 @@
   #_ "treat array as object for further common validation"
   (when items-schema
     (let [obj-array (zipmap (range (count instance)) instance)
-          obj-schema (cond (and (map? items-schema)(:type items-schema))
+          obj-schema (cond (and (map? items-schema)
+                                (:type items-schema))
                            {:type "object"
                             :additionalProperties items-schema}
 
                            (coll? items-schema)
-                           (merge schema {:type "object"
-                                          :properties (zipmap (range (count items-schema)) items-schema)}))]
+                           (merge schema
+                                  {:type "object"
+                                   :properties (zipmap (range (count items-schema))
+                                                       items-schema)}))]
       (validate obj-schema obj-array))))
 
 
@@ -208,15 +224,18 @@
 
   (when (schema :maxLength)
     (if-not (>= (schema :maxLength) (count instance))
-      (invalid :max-length-exceeded {:maxLength (schema :maxLength) :actual (count instance) })))
+      (invalid :max-length-exceeded
+               {:maxLength (schema :maxLength) :actual (count instance) })))
 
   (when (schema :minLength)
     (if-not (<= (schema :minLength) (count instance))
-      (invalid :min-length-not-reached {:minLength (schema :minLength) :actual (count instance) })))
+      (invalid :min-length-not-reached
+               {:minLength (schema :minLength) :actual (count instance) })))
 
   (when (schema :pattern)
     (if-not (.matches instance (schema :pattern))
-      (invalid :pattern-not-matched {:pattern (schema :pattern) :actual instance}))))
+      (invalid :pattern-not-matched
+               {:pattern (schema :pattern) :actual instance}))))
 
 (defmethod validate* "enum"
   [schema instance]
