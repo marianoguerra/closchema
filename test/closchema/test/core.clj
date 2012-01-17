@@ -50,7 +50,9 @@
 
 (deftest validate-items-any
   (is (and (validate {:type "array"} [ 1 2 3])
-           (validate {:type "array" :items []} [1 "2" 3]))
+           (validate {:type "array" :items []} [1 "2" 3])
+           (validate {:type "array"} (map identity [1 2 3]))
+           (validate {:type "array"} #{1 2 3}))
       "should allow any items"))
 
 (deftest validate-items-with-object-schema

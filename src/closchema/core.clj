@@ -100,7 +100,7 @@
 (def ^{:doc "Known basic types."}
      basic-type-validations
      { "object" #(map? %)
-       "array" #(or (vector? %) (list? %))
+       "array" #(or (seq? %) (and (coll? %) (not (map? %))))
        "string" #(string? %)
        "number" #(number? %)
        "integer" #(integer? %)
