@@ -8,6 +8,11 @@
             [clojure.data.json :as json]))
 
 
+;; This could cause memory problems if there are many (say, hundreds)
+;; of schemae that are being read from files
+(def ^{:doc "Cache for schemas read from files" :dynamic true}
+      *schema-cache* (atom {}))
+
 (def ^{:doc "Allow validation errors to be captured." :dynamic true}
      *validation-context* nil)
 
@@ -72,7 +77,9 @@
        (do ~@args))))
 
 (defn- read-schema [loc]
-  (json/read-json (slurp loc)))
+  (when-not (contains? *schema-cache* loc)
+    (swap! *schema-cache* assoc loc (json/read-json (slurp loc))))
+  (get @*schema-cache* loc))
 
 (defmulti validate*
   "Dispatch on object type for validation. If not implemented,
@@ -116,7 +123,6 @@
                           (:type schema))]
     (when-not (some #(= 0 (:errors %)) error-counts)
       (validate (first (:type schema)) instance))))
-
 
 
 (def ^{:doc "Known basic types."}
@@ -173,21 +179,21 @@
 
 
   #_ "validate instance properties (using invidivual or addicional schema)"
+  (if (map? instance)
+    (doseq [[property-name property] instance]
+      (if-let [{requires :requires :as property-schema}
+               (or (and (map? properties-schema) (properties-schema property-name))
+                   (and (map? additional-schema) additional-schema))]
+        (do
+          (when (and requires property
+                     (nil? (get instance (keyword requires))))
+            (invalid requires :required {:required-by property-name}))
 
-  (doseq [[property-name property] instance]
-    (if-let [{requires :requires :as property-schema}
-             (or (and (map? properties-schema) (properties-schema property-name))
-                 (and (map? additional-schema) additional-schema))]
-      (do
-        (when (and requires property
-                   (nil? (get instance (keyword requires))))
-          (invalid requires :required {:required-by property-name}))
 
-
-        (when-not (and (:optional :property-schema) (nil? instance))
-
-          (walk-in instance property-name
-                   (validate property-schema property))))))
+          (when-not (and (:optional :property-schema) (nil? instance))
+            (walk-in instance property-name
+                     (validate property-schema property))))))
+    (invalid :objects-must-be-maps {:properties properties-schema}))
 
 
   #_ "check additional properties"
