@@ -4,7 +4,8 @@
    is to allow object validation, but schema metadata can be used for
    exposing contracts as well."
   (:use clojure.walk clojure.template)
-  (:require [clojure.set :as set]))
+  (:require [clojure.set :as set]
+            [clojure.data.json :as json]))
 
 
 (def ^{:doc "Allow validation errors to be captured." :dynamic true}
@@ -70,16 +71,18 @@
      (with-validation-context
        (do ~@args))))
 
+(defn- read-schema [loc]
+  (json/read-json (slurp loc)))
 
 (defmulti validate*
   "Dispatch on object type for validation. If not implemented,
    performs only basic type validation. Users can extend which types
    are supported by implementing validation for new types."
   (fn [schema instance]
-    (if (:enum schema)
-      "enum"
-      (:type schema))))
-
+    (cond
+      (:$ref schema) "ref"
+      (:enum schema) "enum"
+      :else (:type schema))))
 
 
 (defn validate
@@ -92,10 +95,11 @@
 
 (def default-type "object")
 
-
 (defmethod validate* nil [schema instance]
   (validate (merge schema {:type default-type}) instance))
 
+(defmethod validate* "ref" [schema instance]
+  (validate (read-schema (:$ref schema)) instance))
 
 (def ^{:doc "Known basic types."}
      basic-type-validations
