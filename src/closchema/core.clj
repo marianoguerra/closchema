@@ -32,7 +32,7 @@
                     (process-errors @(:errors *validation-context*)))]
      (if-not *validation-context*
        (binding [*validation-context* {:errors (ref '())
-                                   :path (ref [])}]
+                                       :path (ref [])}]
          (body#))
        (body#))))
 
@@ -80,6 +80,7 @@
    are supported by implementing validation for new types."
   (fn [schema instance]
     (cond
+      (vector? (:type schema)) "union"
       (:$ref schema) "ref"
       (:enum schema) "enum"
       :else (:type schema))))
@@ -100,6 +101,23 @@
 
 (defmethod validate* "ref" [schema instance]
   (validate (read-schema (:$ref schema)) instance))
+
+;; Basically, try all the types with binding to a "fresh"
+;; error queue.  If any of the resulting queues are empty at the
+;; end, the instance validated and there's no reason to do anything.
+;; If not, we pick one of the types (the first one, because why not?)
+;; and put it through validation again to populate the error queue
+(defmethod validate* "union" [schema instance]
+  (let [current-errors #(count (deref (:errors *validation-context*)))
+        error-counts (map #(binding [*validation-context* {:errors (ref '())
+                                                           :path (ref [])}]
+                             (validate % instance)
+                             {:errors (current-errors) :schema %})
+                          (:type schema))]
+    (when-not (some #(= 0 (:errors %)) error-counts)
+      (validate (first (:type schema)) instance))))
+
+
 
 (def ^{:doc "Known basic types."}
      basic-type-validations
