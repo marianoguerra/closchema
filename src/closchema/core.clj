@@ -87,10 +87,11 @@
    are supported by implementing validation for new types."
   (fn [schema instance]
     (cond
+      (string? schema) "simple"
       (vector? (:type schema)) "union"
       (:$ref schema) "ref"
       (:enum schema) "enum"
-      :else (:type schema))))
+      (:type schema) (:type schema))))
 
 
 (defn validate
@@ -109,7 +110,10 @@
 (defmethod validate* "ref" [schema instance]
   (validate (read-schema (:$ref schema)) instance))
 
-;; Basically, try all the types with binding to a "fresh"
+(defmethod validate* "simple" [schema instance]
+  (validate {:type schema} instance))
+
+;; Basically, try all the types with the error queue bound to a "fresh"
 ;; error queue.  If any of the resulting queues are empty at the
 ;; end, the instance validated and there's no reason to do anything.
 ;; If not, we pick one of the types (the first one, because why not?)
