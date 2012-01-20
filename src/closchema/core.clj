@@ -80,10 +80,10 @@
    are supported by implementing validation for new types."
   (fn [schema instance]
     (cond
-      (string? schema) "simple"
-      (vector? (:type schema)) "union"
-      (:$ref schema) "ref"
-      (:enum schema) "enum"
+      (string? schema) ::simple
+      (vector? (:type schema)) ::union
+      (:$ref schema) ::ref
+      (:enum schema) ::enum
       (:type schema) (:type schema))))
 
 
@@ -100,7 +100,7 @@
 (defmethod validate* nil [schema instance]
   (validate (merge schema {:type default-type}) instance))
 
-(defmethod validate* "ref" [schema instance]
+(defmethod validate* ::ref [schema instance]
   (validate (read-schema (:$ref schema)) instance))
 
 ;; This implementation of the multimethod is needed so that
@@ -108,7 +108,7 @@
 ;; (e.g., {:type "object" . . .}).  It causes strings like
 ;; "number" to constitute a valid json spec according to
 ;; validate, but that doesn't seem like a bad idea.
-(defmethod validate* "simple" [schema instance]
+(defmethod validate* ::simple [schema instance]
   (validate {:type schema} instance))
 
 ;; Basically, try all the types with the error queue bound to a "fresh"
@@ -116,7 +116,7 @@
 ;; end, the instance validated and there's no reason to do anything.
 ;; If not, we pick one of the types (the first one, because why not?)
 ;; and put it through validation again to populate the error queue
-(defmethod validate* "union" [schema instance]
+(defmethod validate* ::union [schema instance]
   (let [current-errors #(count (deref (:errors *validation-context*)))
         error-counts (map #(binding [*validation-context* {:errors (ref '())
                                                            :path (ref [])}]
@@ -267,7 +267,7 @@
       (invalid :pattern-not-matched
                {:pattern (schema :pattern) :actual instance}))))
 
-(defmethod validate* "enum"
+(defmethod validate* ::enum
   [schema instance]
   (if-not (true? (some #(= % instance) (schema :enum)))
     (invalid :value-not-in-enum {:enum (schema :enum) :value instance })))
