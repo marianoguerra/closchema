@@ -7,6 +7,25 @@
                                :name {:type "string"}
                                :description {:optional true :type "string"}}})
 
+;; Union type containing either an ID number or a first and last name
+(def union-schema {:type ["integer" {:type "object"
+                                     :properties {:first-name
+                                                  {:type "string"}
+                                                  :last-name
+                                                  {:type "string"}}}]})
+
+(def read-schema {:type "object"
+                  :properties {:person {:$ref "test/test-data/test1.json"}
+                               :dog-name {:type "string"}}})
+
+(def union-array {:type "array"
+                  :items {
+                          :type ["integer"
+                                 {:$ref "test/test-data/test1.json"}]}})
+
+(def json1-item {:name "Fred" :info {:odor "wet dog" :human? true}})
+
+
 (deftest validate-properties
   (let [s base-schema]
     (is (validate s {:id 1 :name "shoe"})
@@ -193,3 +212,34 @@
     (is (validate s {:header true}))
     (is (validate s {:header false}))
     (is (not (validate s {:header 42})))))
+
+(deftest reference
+  (let [schema {:$ref "test/test-data/test1.json"}]
+    (is (validate schema {:name "Jao" :info {:odor "roses" :human? true}}))
+    (is (validate schema {:name "Fido" :info {:odor "wet dog" :human? false}}))
+    (is (not (validate schema {:name "Fido" :info {:odor 4 :human? false}})))
+    (is (not (validate schema {:name "Jao" :info {:odor "roses" :hu? true}})))
+    (is (not (validate schema {:info {:odor "roses" :human? true}}))))
+  (is (validate read-schema {:person json1-item :dog-name "wrinkles"}))
+  (is (not (validate read-schema {:person 5 :dog-name "wrinkles"})))
+  (is (not (validate read-schema {:person json1-item}))))
+
+(deftest union
+  (is (validate union-schema 5))
+  (is (validate union-schema 123124))
+  (is (not (validate union-schema 123.124)))
+  (is (not (validate union-schema [1 2 3])))
+  (is (validate union-schema {:first-name "charles" :last-name "parker"}))
+  (is (not (validate union-schema {:first-name "charles" :last "parker"})))
+  (is (not (validate union-schema {:first-name "charles" :last-name 4})))
+  (is (not (validate union-schema {:first-name true :last-name "parker"}))))
+
+(deftest array-union
+  (is (validate union-array [1 2 3]))
+  (is (validate union-array [1 2232 314567]))
+  (is (validate union-array [10]))
+  (is (validate union-array [10 json1-item 1423]))
+  (is (validate union-array [json1-item json1-item]))
+  (is (not (validate union-array [json1-item 23.5 json1-item])))
+  (is (not (validate union-array [1 (assoc json1-item :name false) 2])))
+  (is (not (validate union-array [1 "yes" 2 3]))))

@@ -110,6 +110,11 @@
 (defmethod validate* "ref" [schema instance]
   (validate (read-schema (:$ref schema)) instance))
 
+;; This implementation of the multimethod is needed so that
+;; Union types can be simple (e.g., "integer") or complex
+;; (e.g., {:type "object" . . .}).  It causes strings like
+;; "number" to constitute a valid json spec according to
+;; validate, but that doesn't seem like a bad idea.
 (defmethod validate* "simple" [schema instance]
   (validate {:type schema} instance))
 
