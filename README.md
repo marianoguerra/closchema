@@ -42,4 +42,4 @@ Reading is lazy, so the schema is not read until we hit it at validation time.  
 
 ## TODO
 
-- The entire spec http://tools.ietf.org/html/draft-zyp-json-schema-03 is not implemented yet. We'll gradually support more features when needed.
+The entire spec http://tools.ietf.org/html/draft-zyp-json-schema-03 is not implemented yet. We'll gradually support more features when needed.
