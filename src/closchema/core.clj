@@ -84,7 +84,7 @@
       (vector? (:type schema)) ::union
       (:$ref schema) ::ref
       (:enum schema) ::enum
-      (:type schema) (:type schema))))
+      (:type schema) (keyword (:type schema)))))
 
 
 (defn validate
@@ -165,7 +165,7 @@
   (common-validate schema instance))
 
 
-(defmethod validate* "object"
+(defmethod validate* :object
   [{properties-schema :properties
     additional-schema :additionalProperties
     :as schema} instance]
@@ -209,7 +209,7 @@
 
 
 
-(defmethod validate* "array"
+(defmethod validate* :array
   [{items-schema :items
     unique? :uniqueItems :as schema} instance]
 
@@ -248,7 +248,7 @@
 
 
 
-(defmethod validate* "string"
+(defmethod validate* :string
   [schema instance]
   (common-validate schema instance)
 
@@ -273,7 +273,7 @@
     (invalid :value-not-in-enum {:enum (schema :enum) :value instance })))
 
 
-(defmethod validate* "number"
+(defmethod validate* :number
   [schema instance]
   (common-validate schema instance)
   (when (schema :maximum)
