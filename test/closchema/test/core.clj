@@ -15,13 +15,13 @@
                                                   {:type "string"}}}]})
 
 (def read-schema {:type "object"
-                  :properties {:person {:$ref "test/test-data/test1.json"}
+                  :properties {:person {:$ref "test1.json"}
                                :dog-name {:type "string"}}})
 
 (def union-array {:type "array"
                   :items {
                           :type ["integer"
-                                 {:$ref "test/test-data/test1.json"}]}})
+                                 {:$ref "test1.json"}]}})
 
 (def json1-item {:name "Fred" :info {:odor "wet dog" :human? true}})
 
@@ -214,7 +214,7 @@
     (is (not (validate s {:header 42})))))
 
 (deftest reference
-  (let [schema {:$ref "test/test-data/test1.json"}]
+  (let [schema {:$ref "test1.json"}]
     (is (validate schema {:name "Jao" :info {:odor "roses" :human? true}}))
     (is (validate schema {:name "Fido" :info {:odor "wet dog" :human? false}}))
     (is (not (validate schema {:name "Fido" :info {:odor 4 :human? false}})))

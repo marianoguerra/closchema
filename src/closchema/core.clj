@@ -8,21 +8,16 @@
             [clojure.data.json :as json]))
 
 
-;; This could cause memory problems if there are many (say, hundreds)
-;; of schemae that are being read from files
-(def ^{:doc "Cache for schemas read from files" :dynamic true}
-      *schema-cache* (atom {}))
+(def ^:dynamic *validation-context*
+  "Allow validation errors to be captured."
+  nil)
 
-(def ^{:doc "Allow validation errors to be captured." :dynamic true}
-     *validation-context* nil)
+(def ^:dynamic *parent*
+  "When walking an object, we keep a binding to current parent."
+  nil)
 
-(def ^{:doc "When walking an object, we keep a binding to current parent."
-       :dynamic true}
-     *parent* nil)
-
-
-(def ^{:doc "Default processing just outputs a boolean return." :dynamic true}
-  process-errors
+(def ^:dynamic process-errors
+  "Default processing just outputs a boolean return."
   (fn [errors] (= (count errors) 0)))
 
 
@@ -77,9 +72,7 @@
        (do ~@args))))
 
 (defn- read-schema [loc]
-  (when-not (contains? *schema-cache* loc)
-    (swap! *schema-cache* assoc loc (json/read-json (slurp loc))))
-  (get @*schema-cache* loc))
+  ((memoize (comp json/read-json slurp clojure.java.io/resource)) loc))
 
 (defmulti validate*
   "Dispatch on object type for validation. If not implemented,

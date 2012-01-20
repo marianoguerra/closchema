@@ -1,8 +1,0 @@
-{
-    "description" : "A test schema for checking referencing"
-    "type" : "object"
-    "properties" {
-        "name" : {"type" : "string"}
-        "info" : {"$ref" : "test/test-data/test2.json"}
-    }
-}
