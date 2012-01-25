@@ -1,5 +1,6 @@
 (ns closchema.test.core
   (:use [closchema.core :only [validate]]
+        [clojure.data.json :only [read-json]]
         [clojure.test]))
 
 (def base-schema {:type "object"
@@ -23,8 +24,9 @@
                           :type ["integer"
                                  {:$ref "test1.json"}]}})
 
-(def json1-item {:name "Fred" :info {:odor "wet dog" :human? true}})
+(def self-ref (read-json (slurp (clojure.java.io/resource "self-ref.json"))))
 
+(def json1-item {:name "Fred" :info {:odor "wet dog" :human? true}})
 
 (deftest validate-properties
   (let [s base-schema]
@@ -243,3 +245,20 @@
   (is (not (validate union-array [json1-item 23.5 json1-item])))
   (is (not (validate union-array [1 (assoc json1-item :name false) 2])))
   (is (not (validate union-array [1 "yes" 2 3]))))
+
+(deftest array-self-ref
+  (is (validate self-ref {:id 1}))
+  (is (validate self-ref {:id 1 :children [{:id 5}]}))
+  (is (validate self-ref {:id 1 :children [{:id 5} {:id 4}]}))
+  (is (validate self-ref {:id 1 :children [{:id 5}
+                                           {:id 4 :children [{:id 6}]}]}))
+  (is (not (validate self-ref {:id 1 :children [3 4 5]})))
+  (is (not (validate self-ref {:id 1.5 :children [{:id 5} {:id 4}]})))
+  (is (not (validate self-ref {:id 1 :children [{:id 5} {:id "a"}]})))
+  (is (not (validate self-ref {:id 1 :children [{:id 5}
+                                                {:id 4
+                                                 :children [{:i 6}]}]})))
+  (is (not (validate self-ref {:id 1 :children [{:id 5}
+                                                {:id "a"
+                                                 :children [{:id 6}]}]}))))
+

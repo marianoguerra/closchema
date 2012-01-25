@@ -124,7 +124,7 @@
                              {:errors (current-errors) :schema %})
                           (:type schema))]
     (when-not (some #(= 0 (:errors %)) error-counts)
-      (validate (first (:type schema)) instance))))
+      (invalid :matches-no-type-in-union {:properties (:type schema)}))))
 
 
 (def ^{:doc "Known basic types."}
@@ -179,7 +179,6 @@
       (when-not (or (not (nil? property)) optional)
         (invalid property-name :required))))
 
-
   #_ "validate instance properties (using invidivual or addicional schema)"
   (if (map? instance)
     (doseq [[property-name property] instance]
@@ -229,16 +228,18 @@
                         (invalid :uniqueItems {:l l :r r}))
               r) instance))
 
-
   #_ "treat array as object for further common validation"
   (when items-schema
-    (let [obj-array (zipmap (range (count instance)) instance)
-          obj-schema (cond (and (map? items-schema)
-                                (:type items-schema))
+    (let [obj-array (if (and (coll? instance) (not (map? instance)))
+                      (zipmap (range (count instance)) instance)
+                      {0 instance})
+          obj-schema (cond (or (and (map? items-schema)
+                                    (:type items-schema))
+                               (:$ref items-schema))
                            {:type "object"
                             :additionalProperties items-schema}
 
-                           (coll? items-schema)
+                           (vector? items-schema)
                            (merge schema
                                   {:type "object"
                                    :properties (zipmap (range (count items-schema))
