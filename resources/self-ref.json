@@ -1,0 +1,10 @@
+{   "type": "object",
+    "properties": {
+        "id": {"type": "integer"}
+        "children": {
+            "optional": true,
+            "type": "array",
+            "items": {"$ref": "self-ref.json"}
+        }
+    }
+}
