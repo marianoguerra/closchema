@@ -5,31 +5,33 @@ A clojure library that implements
 
 ## Examples
 
-        (require 'com.bigml.closchema)
-
-
-        (validate {:type "array" :items {:type "string"}} ["1" "2"])
-        => true
-
-
-        (validate {:type "array" :items {:type "string"}} ["1" 2])
-        => false
-
-        (report-errors
-          (validate {:type "array" :items {:type "string"}} ["1" 2 {}]))
-          => '(.. errors )
+```
+(require 'com.bigml.closchema)
+=> nil
+(validate {:type "array" :items {:type "string"}} ["1" "2"])
+=> true
+(validate {:type "array" :items {:type "string"}} ["1" 2])
+=> false
+(report-errors
+  (validate {:type "array" :items {:type "string"}} ["1" 2 {}]))
+=> '(.. errors )
+```
 
 ## JSON Object Referencing (Schema extension)
 
-This library implements the **file-based** part of referencing described here (at the end of the post):
+This library implements the **file-based** part of referencing described here
+(at the end of the post):
 
 http://www.sitepen.com/blog/2008/10/31/json-schema/
 
-Right now, you can only specify filenames (not full URLs), and they must be located in your Java resources directory, as specified on the classpath.  **There is no ID-based referencing as of this readme.**
+Right now, you can only specify filenames (not full URLs), and they must be
+located in your Java resources directory, as specified on the classpath.
+**There is no ID-based referencing as of this readme.**
 
-With this extension, one can specify a reference to a file containing a schema using the key `$ref` when describing a property:
+With this extension, one can specify a reference to a file containing a schema
+using the key `$ref` when describing a property:
 
-```
+```json
 {
     "type" : object
     "properties" : {
@@ -38,7 +40,10 @@ With this extension, one can specify a reference to a file containing a schema u
     }
 }
 ```
-Reading is lazy, so the schema is not read until we hit it at validation time.  Files are read using `slurp` and `clojure.data.json`.  Schema references are cached using `memoize`.
+
+Reading is lazy, so the schema is not read until we hit it at validation time.
+Files are read using `slurp` and `clojure.data.json`.  Schema references
+are cached using `memoize`.
 
 ## Inheritance with `extends`
 
@@ -46,11 +51,16 @@ Reading is lazy, so the schema is not read until we hit it at validation time.  
 
 http://www.sitepen.com/blog/2009/09/02/json-namespacing/
 
-Anything validating as `:type "object"` can use `extends`.  The value of `extends` can be any valid schema, or any array of schemas.  This specifies that, as part of its validation, this object must validate against the specified schema or schemas.
+Anything validating as `:type "object"` can use `extends`.  The value of `
+extends`  can be any valid schema, or any array of schemas.  This specifies
+that, as part of its validation, this object must validate against the
+specified schema or schemas.
 
-Thus, the following produces a schema specifying an `:id` that is an `integer`, and also specifying that an object must additionally validate against the schema in `"file1.json"`.
+Thus, the following produces a schema specifying an `:id` that is an `integer`,
+and also specifying that an object must additionally validate against the
+schema in `"file1.json"`.
 
-```
+```json
 {
     "type" : object
     "extends" : {"$ref" : "file1.json"}
@@ -62,7 +72,7 @@ Thus, the following produces a schema specifying an `:id` that is an `integer`, 
 
 Multiple inheritance also has the expected semantics:
 
-```
+```json
 {
     "type" : object
     "extends" : [{"$ref" : "file1.json"} {"$ref" : "file2.json"}]
@@ -72,8 +82,11 @@ Multiple inheritance also has the expected semantics:
 }
 ```
 
-A word of caution: If `:additionalProperties false` is set in a "child" schema, nothing will validate against it unless the parent schema(s) is/are empty.  That is, `:additionalProperties` takes precedence over `:extends`.
+A word of caution: If `:additionalProperties false` is set in a "child"
+schema, nothing will validate against it unless the parent schema(s) is/are
+empty.  That is, `:additionalProperties` takes precedence over `:extends`.
 
 ## TODO
 
-The entire spec http://tools.ietf.org/html/draft-zyp-json-schema-03 is not implemented yet. We'll gradually support more features when needed.
+The entire spec http://tools.ietf.org/html/draft-zyp-json-schema-03 is
+not implemented yet. We'll gradually support more features when needed.
