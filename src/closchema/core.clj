@@ -175,7 +175,7 @@
   (common-validate schema instance)
 
   ;; "parent" schema validation
-  (when-not (nil? parent) (validate (read-schema parent) instance))
+  (when-not (nil? parent) (validate parent instance))
 
   ;; validate properties defined in schema
   (doseq [[property-name

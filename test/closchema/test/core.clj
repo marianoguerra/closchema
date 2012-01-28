@@ -26,7 +26,7 @@
 (def self-ref (read-json (slurp (clojure.java.io/resource "self-ref.json"))))
 
 (def extends-schema {:type "object"
-                     :extends "test2.json"
+                     :extends {:$ref "test2.json"}
                      :properties {:id {:type "integer"}}})
 
 (def json1-item {:name "Fred" :info {:odor "wet dog" :human? true}})
