@@ -175,35 +175,56 @@
     (is (not (validate s "2")) "not a number")))
 
 (deftest validate-max-number
-  (let [s {:type '"number" :exclusiveMaximum 5}]
+  (let [s {:type '"number" :exclusiveMaximum 5}
+        t {:type '"integer" :exclusiveMaximum 5}]
     (is (validate s 4) "lower than maximum")
     (is (and (not (validate s 6)) (not (validate s 5)))
+        "greater or equal than maximum")
+    (is (validate t 4) "lower than maximum")
+    (is (and (not (validate t 6)) (not (validate t 5)))
         "greater or equal than maximum")))
 
 (deftest validate-min-number
-  (let [s {:type '"number" :exclusiveMinimum 2}]
+  (let [s {:type '"number" :exclusiveMinimum 2}
+        t {:type '"integer" :exclusiveMinimum 2}]
     (is (validate s 3) "above minimum")
     (is (and (not (validate s 1)) (not (validate s 2)))
+        "less or equal than minimum")
+    (is (validate t 3) "above minimum")
+    (is (and (not (validate t 1)) (not (validate t 2)))
         "less or equal than minimum")))
 
 (deftest validate-max-number
-  (let [s {:type '"number" :maximum 5}]
+  (let [s {:type '"number" :maximum 5}
+        t {:type '"integer" :maximum 5}]
     (is (and (validate s 5) (validate s 4))
         "should validate if is lower or equal maximum")
     (is (not (validate s 6))
+        "should not validate if not lower nor equal maximum")
+    (is (and (validate t 5) (validate t 4))
+        "should validate if is lower or equal maximum")
+    (is (not (validate t 6))
         "should not validate if not lower nor equal maximum")))
 
 (deftest validate-min-number
-  (let [s {:type '"number" :minimum 2}]
+  (let [s {:type '"number" :minimum 2}
+        t {:type '"integer" :minimum 2}]
     (is (and (validate s 3) (validate s 2))
         "should validate if is above or equal minimum")
     (is (not (validate s 1))
+        "should not validate if not above nor equal minimum")
+    (is (and (validate t 3) (validate t 2))
+        "should validate if is above or equal minimum")
+    (is (not (validate t 1))
         "should not validate if not above nor equal minimum")))
 
 (deftest validate-divisible-number
-  (let [s {:type "number" :divisibleBy 2}]
+  (let [s {:type "number" :divisibleBy 2}
+        t {:type "integer" :divisibleBy 2}]
     (is (validate s 4) "number is divisible by 2")
-    (is (not (validate s 5)) "if number it not divisible by 2")))
+    (is (not (validate s 5)) "if number it not divisible by 2")
+    (is (validate t 4) "number is divisible by 2")
+    (is (not (validate t 5)) "if number it not divisible by 2")))
 
 (deftest validate-booleans
   (let [s {:type "boolean"}]

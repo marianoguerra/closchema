@@ -80,6 +80,7 @@
    are supported by implementing validation for new types."
   (fn [schema instance]
     (cond
+      (or (= (:type schema) "integer") (= (:type schema) "number")) ::value
       (string? schema) ::simple
       (vector? (:type schema)) ::union
       (:$ref schema) ::ref
@@ -274,7 +275,7 @@
     (invalid :value-not-in-enum {:enum (schema :enum) :value instance })))
 
 
-(defmethod validate* :number
+(defmethod validate* ::value
   [schema instance]
   (common-validate schema instance)
   (when (schema :maximum)
