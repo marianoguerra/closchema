@@ -20,11 +20,14 @@
                                :dog-name {:type "string"}}})
 
 (def union-array {:type "array"
-                  :items {
-                          :type ["integer"
+                  :items {:type ["integer"
                                  {:$ref "test1.json"}]}})
 
 (def self-ref (read-json (slurp (clojure.java.io/resource "self-ref.json"))))
+
+(def extends-schema {:type "object"
+                     :extends "test2.json"
+                     :properties {:id {:type "integer"}}})
 
 (def json1-item {:name "Fred" :info {:odor "wet dog" :human? true}})
 
@@ -296,4 +299,11 @@
   (is (validate {:type "array" :items [{:type "null"}
                                        {:type ["integer" "null"]}]}
                 [nil nil])))
+
+(deftest extends
+  (is (validate extends-schema {:id 1 :human? false :odor "wet dog"}))
+  (is (validate extends-schema {:id -1 :human? true :odor "roses"}))
+  (is (not (validate extends-schema {:id 1 :humn? false :odor "wet-dog"})))
+  (is (not (validate extends-schema {:id 1 :human? false :odor "rozes"})))
+  (is (not (validate extends-schema {:id 1.1 :human? false :odor "roses"}))))
 

@@ -169,18 +169,22 @@
 (defmethod validate* :object
   [{properties-schema :properties
     additional-schema :additionalProperties
+    parent :extends
     :as schema} instance]
 
   (common-validate schema instance)
 
-  #_ "validate properties defined in schema"
+  ;; "parent" schema validation
+  (when-not (nil? parent) (validate (read-schema parent) instance))
+
+  ;; validate properties defined in schema
   (doseq [[property-name
            {optional :optional :as property-schema}] properties-schema]
     (let [prop-exists (contains? instance property-name)]
       (when-not (or prop-exists optional)
         (invalid property-name :required))))
 
-  #_ "validate instance properties (using individual or additional schema)"
+  ;; validate instance properties (using individual or additional schema)
   (if (map? instance)
     (doseq [[property-name property] instance]
       (if-let [{requires :requires :as property-schema}
@@ -198,7 +202,7 @@
     (invalid :objects-must-be-maps {:properties properties-schema}))
 
 
-  #_ "check additional properties"
+  ;; check additional properties
   (when (false? additional-schema)
     (if-let [additionals (set/difference (set (keys instance))
                                       (set (keys properties-schema)))]
@@ -207,15 +211,13 @@
                  {:properties additionals})))))
 
 
-
-
 (defmethod validate* :array
   [{items-schema :items
     unique? :uniqueItems :as schema} instance]
 
   (common-validate schema instance)
 
-  #_ "specific array validation"
+  ;; specific array validation
   (let [total (count instance)]
     (do-template [key op]
                  (if-let [expected (key schema)]
@@ -229,7 +231,7 @@
                         (invalid :uniqueItems {:l l :r r}))
               r) instance))
 
-  #_ "treat array as object for further common validation"
+  ;; treat array as object for further common validation
   (when items-schema
     (let [obj-array (if (and (coll? instance) (not (map? instance)))
                       (zipmap (range (count instance)) instance)
@@ -246,8 +248,6 @@
                                    :properties (zipmap (range (count items-schema))
                                                        items-schema)}))]
       (validate obj-schema obj-array))))
-
-
 
 
 (defmethod validate* :string
