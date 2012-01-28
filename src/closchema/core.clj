@@ -175,11 +175,11 @@
   #_ "validate properties defined in schema"
   (doseq [[property-name
            {optional :optional :as property-schema}] properties-schema]
-    (let [property (get instance property-name)]
-      (when-not (or (not (nil? property)) optional)
+    (let [prop-exists (contains? instance property-name)]
+      (when-not (or prop-exists optional)
         (invalid property-name :required))))
 
-  #_ "validate instance properties (using invidivual or addicional schema)"
+  #_ "validate instance properties (using individual or additional schema)"
   (if (map? instance)
     (doseq [[property-name property] instance]
       (if-let [{requires :requires :as property-schema}

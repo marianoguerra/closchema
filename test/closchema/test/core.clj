@@ -262,3 +262,17 @@
                                                 {:id "a"
                                                  :children [{:id 6}]}]}))))
 
+(deftest null-in-objects
+  (is (validate {:type "object" :properties {:id {:type "null"}}} {:id nil}))
+  (is (not (validate {:type "object" :properties {:id {:type "null"}}}
+                     {:id 4})))
+  (is (not (validate {:type "object" :properties {:id {:type "null"}}}
+                     {:id "a"})))
+  (is (validate {:type "array" :items [{:type "null"} {:type "integer"}]}
+                [nil 1]))
+  (is (not (validate {:type "array" :items [{:type "null"} {:type "integer"}]}
+                     [1 nil])))
+  (is (validate {:type "array" :items [{:type "null"}
+                                       {:type ["integer" "null"]}]}
+                [nil nil])))
+
