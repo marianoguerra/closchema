@@ -29,6 +29,11 @@
                      :extends {:$ref "test2.json"}
                      :properties {:id {:type "integer"}}})
 
+(def extends-mult {:type "object"
+                   :extends [{:$ref "test2.json"}
+                             {:type "object"
+                              :properties {:name {:type "string"}}}]})
+
 (def json1-item {:name "Fred" :info {:odor "wet dog" :human? true}})
 
 (deftest validate-properties
@@ -307,3 +312,9 @@
   (is (not (validate extends-schema {:id 1 :human? false :odor "rozes"})))
   (is (not (validate extends-schema {:id 1.1 :human? false :odor "roses"}))))
 
+(deftest multiple-inheritance
+  (is (validate extends-mult {:name "a" :human? false :odor "wet dog"}))
+  (is (validate extends-mult {:name "b" :human? true :odor "roses"}))
+  (is (not (validate extends-mult {:name "a" :odor "wet-dog"})))
+  (is (not (validate extends-mult {:name 1 :human? false :odor "rozes"})))
+  (is (not (validate extends-mult {:human? false :odor "roses"}))))
