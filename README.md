@@ -6,14 +6,14 @@ A clojure library that implements
 ## Examples
 
 ```
-(require 'com.bigml.closchema)
+(require '[closchema.core :as schema])
 => nil
-(validate {:type "array" :items {:type "string"}} ["1" "2"])
+(schema/validate {:type "array" :items {:type "string"}} ["1" "2"])
 => true
-(validate {:type "array" :items {:type "string"}} ["1" 2])
+(schema/validate {:type "array" :items {:type "string"}} ["1" 2])
 => false
-(report-errors
-  (validate {:type "array" :items {:type "string"}} ["1" 2 {}]))
+(schema/report-errors
+  (schema/validate {:type "array" :items {:type "string"}} ["1" 2 {}]))
 => '(.. errors )
 ```
 
