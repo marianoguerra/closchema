@@ -8,16 +8,19 @@
             [clojure.data.json :as json]))
 
 
-(def ^:dynamic *validation-context*
-  "Allow validation errors to be captured."
+(def ^{:dynamic true
+       :doc "Allow validation errors to be captured."}
+  *validation-context*
   nil)
 
-(def ^:dynamic *parent*
-  "When walking an object, we keep a binding to current parent."
+(def ^{:dynamic true
+       :doc "When walking an object, we keep a binding to current parent."}
+  *parent*
   nil)
 
-(def ^:dynamic process-errors
-  "Default processing just outputs a boolean return."
+(def ^{:dynamic true
+       :doc "Default processing just outputs a boolean return."}
+  process-errors
   (fn [errors] (= (count errors) 0)))
 
 
