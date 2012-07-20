@@ -121,15 +121,18 @@
 ;; If not, we pick one of the types (the first one, because why not?)
 ;; and put it through validation again to populate the error queue
 (defmethod validate* ::union [schema instance]
-  (let [current-errors #(count (deref (:errors *validation-context*)))
+  (let [current-errors #(count @(:errors *validation-context*))
         error-counts (map #(binding [*validation-context* {:errors (ref '())
                                                            :path (ref [])}]
                              (validate % instance)
-                             {:errors (current-errors) :schema %})
+                             {:error-count (current-errors)
+                              :errors @(:errors *validation-context*)
+                              :schema %})
                           (:type schema))]
-    (when-not (some #(= 0 (:errors %)) error-counts)
-      (invalid :matches-no-type-in-union {:properties (:type schema)}))))
-
+    (when-not (some #(= 0 (:error-count %)) error-counts)
+      (let [errors (sort-by :error-count error-counts)]
+        (invalid :matches-no-type-in-union
+                 {:instance instance :errors (:errors (first errors))})))))
 
 (def ^{:doc "Known basic types."}
      basic-type-validations
