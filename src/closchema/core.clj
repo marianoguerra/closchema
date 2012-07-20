@@ -118,12 +118,12 @@
 ;; If not, we pick one of the types (the first one, because why not?)
 ;; and put it through validation again to populate the error queue
 (defmethod validate* ::union [schema instance]
-  (let [current-errors #(count (deref (:errors *validation-context*)))
+  (let [current-errors #(count @(:errors *validation-context*))
         error-counts (map #(binding [*validation-context* {:errors (ref '())
                                                            :path (ref [])}]
                              (validate % instance)
                              {:error-count (current-errors)
-                              :errors (deref (:errors *validation-context*))
+                              :errors @(:errors *validation-context*)
                               :schema %})
                           (:type schema))]
     (when-not (some #(= 0 (:error-count %)) error-counts)
