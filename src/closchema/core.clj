@@ -122,11 +122,14 @@
         error-counts (map #(binding [*validation-context* {:errors (ref '())
                                                            :path (ref [])}]
                              (validate % instance)
-                             {:errors (current-errors) :schema %})
+                             {:error-count (current-errors)
+                              :errors (deref (:errors *validation-context*))
+                              :schema %})
                           (:type schema))]
-    (when-not (some #(= 0 (:errors %)) error-counts)
-      (invalid :matches-no-type-in-union {:properties (:type schema)}))))
-
+    (when-not (some #(= 0 (:error-count %)) error-counts)
+      (let [errors (sort-by :error-count error-counts)]
+        (invalid :matches-no-type-in-union
+                 {:instance instance :errors (:errors (first errors))})))))
 
 (def ^{:doc "Known basic types."}
      basic-type-validations
