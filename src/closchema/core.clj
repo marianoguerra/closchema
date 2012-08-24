@@ -213,7 +213,7 @@
     (if-let [additionals (set/difference (set (keys instance))
                                       (set (keys properties-schema)))]
       (when (> (count additionals) 0)
-        (invalid :addicional-properties-not-allowed
+        (invalid :additional-properties-not-allowed
                  {:properties additionals})))))
 
 
