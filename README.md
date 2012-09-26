@@ -3,6 +3,8 @@
 A clojure library that implements
 [JSON schema](http://json-schema.org/) validation.
 
+This library is distributed under the MIT license (see LICENSE).
+
 ## Examples
 
 ```
