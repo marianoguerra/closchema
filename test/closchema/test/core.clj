@@ -318,3 +318,6 @@
   (is (not (validate extends-mult {:name "a" :odor "wet-dog"})))
   (is (not (validate extends-mult {:name 1 :human? false :odor "rozes"})))
   (is (not (validate extends-mult {:human? false :odor "roses"}))))
+
+(deftest validate-any-type
+  (is (= (validate {:type "any"} 1) true)))

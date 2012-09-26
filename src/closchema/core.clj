@@ -140,7 +140,7 @@
        "integer" #(integer? %)
        "boolean" #(instance? Boolean %)
        "null" #(nil? %)
-       "any" (fn [] true)})
+       "any" (fn [thing] true)})
 
 
 (defn check-basic-type
