@@ -260,20 +260,23 @@
   [schema instance]
   (common-validate schema instance)
 
-  (when (schema :maxLength)
-    (if-not (>= (schema :maxLength) (count instance))
-      (invalid :max-length-exceeded
-               {:maxLength (schema :maxLength) :actual (count instance) })))
+  (when (string? instance)
 
-  (when (schema :minLength)
-    (if-not (<= (schema :minLength) (count instance))
-      (invalid :min-length-not-reached
-               {:minLength (schema :minLength) :actual (count instance) })))
+    (do
+      (when (schema :maxLength)
+      (if-not (>= (schema :maxLength) (count instance))
+        (invalid :max-length-exceeded
+                 {:maxLength (schema :maxLength) :actual (count instance) })))
 
-  (when (schema :pattern)
-    (if-not (.matches instance (schema :pattern))
-      (invalid :pattern-not-matched
-               {:pattern (schema :pattern) :actual instance}))))
+      (when (schema :minLength)
+        (if-not (<= (schema :minLength) (count instance))
+          (invalid :min-length-not-reached
+                   {:minLength (schema :minLength) :actual (count instance) })))
+
+      (when (schema :pattern)
+        (if-not (.matches instance (schema :pattern))
+          (invalid :pattern-not-matched
+                   {:pattern (schema :pattern) :actual instance}))))))
 
 (defmethod validate* ::enum
   [schema instance]

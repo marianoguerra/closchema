@@ -321,3 +321,6 @@
 
 (deftest validate-any-type
   (is (= (validate {:type "any"} 1) true)))
+
+(deftest validate-type-string-with-minlength-with-number
+  (validate {:type "string" :minLength 3} 1))
