@@ -320,7 +320,14 @@
   (is (not (validate extends-mult {:human? false :odor "roses"}))))
 
 (deftest validate-any-type
-  (is (= (validate {:type "any"} 1) true)))
+  (is (= (validate {:type "any"} 1)))
+  (is (= (validate {:type "any"} [1 2 3])))
+  (is (= (validate {:type "any"} {:a 3}))))
 
-(deftest validate-type-string-with-minlength-with-number
-  (validate {:type "string" :minLength 3} 1))
+(deftest validate-type-string-with-length-limits
+  (is (not (validate {:type "string" :minLength 3} 1)))
+  (is (not (validate {:type "string" :minLength 3} "ab")))
+  (is (not (validate {:type "string" :maxLength 3} "abcd")))
+  (is (not (validate {:type "string" :minLength 5 :maxLength 4} "abcde")))
+  (is (validate {:type "string" :minLength 3 :maxLength 8} "abc"))
+  (is (validate {:type "string" :minLength 3 :maxLength 8} "abcdef")))
