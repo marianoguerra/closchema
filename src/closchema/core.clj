@@ -140,14 +140,12 @@
        "integer" #(integer? %)
        "boolean" #(instance? Boolean %)
        "null" #(nil? %)
-       "any" (fn [thing] true)})
+       "any" (constantly true)})
 
 
 (defn check-basic-type
   "Validate basic type definition for known types."
   [{t :type :as schema} instance]
-
-
   (or (and (nil? instance) (:optional schema))
       (let [t (or t default-type)
             types (if (coll? t) t (vector t))]
@@ -259,24 +257,19 @@
 (defmethod validate* :string
   [schema instance]
   (common-validate schema instance)
-
   (when (string? instance)
-
-    (do
-      (when (schema :maxLength)
+    (when (schema :maxLength)
       (if-not (>= (schema :maxLength) (count instance))
         (invalid :max-length-exceeded
-                 {:maxLength (schema :maxLength) :actual (count instance) })))
-
-      (when (schema :minLength)
-        (if-not (<= (schema :minLength) (count instance))
-          (invalid :min-length-not-reached
-                   {:minLength (schema :minLength) :actual (count instance) })))
-
-      (when (schema :pattern)
-        (if-not (.matches instance (schema :pattern))
-          (invalid :pattern-not-matched
-                   {:pattern (schema :pattern) :actual instance}))))))
+                 {:maxLength (schema :maxLength) :actual (count instance)})))
+    (when (schema :minLength)
+      (if-not (<= (schema :minLength) (count instance))
+        (invalid :min-length-not-reached
+                 {:minLength (schema :minLength) :actual (count instance)})))
+    (when (schema :pattern)
+      (if-not (.matches instance (schema :pattern))
+        (invalid :pattern-not-matched
+                 {:pattern (schema :pattern) :actual instance})))))
 
 (defmethod validate* ::enum
   [schema instance]
