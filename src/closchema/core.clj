@@ -266,27 +266,28 @@
 (defmethod validate* ::value
   [schema instance]
   (common-validate schema instance)
-  (when (schema :maximum)
-    (if-not (>= (schema :maximum) instance)
-      (invalid :value-greater-then-maximum
-               {:maximum (schema :maximum) :value instance })))
+  (when (integer? instance)
+    (when (schema :maximum)
+      (if-not (>= (schema :maximum) instance)
+        (invalid :value-greater-then-maximum
+                 {:maximum (schema :maximum) :value instance })))
 
-  (when (schema :minimum)
-    (if-not (<= (schema :minimum) instance)
-      (invalid :value-lower-then-minimum
-               {:minimum (schema :minimum) :value instance })))
+    (when (schema :minimum)
+      (if-not (<= (schema :minimum) instance)
+        (invalid :value-lower-then-minimum
+                 {:minimum (schema :minimum) :value instance })))
 
-  (when (schema :exclusiveMaximum)
-    (if-not (> (schema :exclusiveMaximum) instance)
-      (invalid :value-greater-or-equal-then-maximum
-               {:exclusiveMaximum (schema :exclusiveMaximum) :value instance })))
+    (when (schema :exclusiveMaximum)
+      (if-not (> (schema :exclusiveMaximum) instance)
+        (invalid :value-greater-or-equal-then-maximum
+                 {:exclusiveMaximum (schema :exclusiveMaximum) :value instance })))
 
-  (when (schema :exclusiveMinimum)
-    (if-not (< (schema :minimumCanEqual) instance)
-      (invalid :value-lower-or-equal-then-minimum
-               {:exclusiveMinimum (schema :exclusiveMinimum) :value instance })))
+    (when (schema :exclusiveMinimum)
+      (if-not (< (schema :minimumCanEqual) instance)
+        (invalid :value-lower-or-equal-then-minimum
+                 {:exclusiveMinimum (schema :exclusiveMinimum) :value instance })))
 
-  (when (schema :divisibleBy)
-    (if-not (= 0 (mod instance (schema :divisibleBy)))
-      (invalid :value-not-divisible-by
-               {:divisibleBy (schema :divisibleBy) :value instance}))))
+    (when (schema :divisibleBy)
+      (if-not (= 0 (mod instance (schema :divisibleBy)))
+        (invalid :value-not-divisible-by
+                 {:divisibleBy (schema :divisibleBy) :value instance})))))

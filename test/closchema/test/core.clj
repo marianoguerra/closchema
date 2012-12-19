@@ -331,3 +331,6 @@
   (is (not (validate {:type "string" :minLength 5 :maxLength 4} "abcde")))
   (is (validate {:type "string" :minLength 3 :maxLength 8} "abc"))
   (is (validate {:type "string" :minLength 3 :maxLength 8} "abcdef")))
+
+(deftest validate-type-integer-with-vector-input
+         (is (not (validate {:type "integer" :minimum 0} [1 2 3]))))
