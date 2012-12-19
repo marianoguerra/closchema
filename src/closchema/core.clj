@@ -266,7 +266,7 @@
 (defmethod validate* ::value
   [schema instance]
   (common-validate schema instance)
-  (when (integer? instance)
+  (when (number? instance)
     (when (schema :maximum)
       (if-not (>= (schema :maximum) instance)
         (invalid :value-greater-then-maximum
