@@ -92,3 +92,4 @@ empty.  That is, `:additionalProperties` takes precedence over `:extends`.
 
 The entire spec http://tools.ietf.org/html/draft-zyp-json-schema-03 is
 not implemented yet. We'll gradually support more features when needed.
+
