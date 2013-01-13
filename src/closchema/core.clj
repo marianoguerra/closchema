@@ -8,12 +8,12 @@
             [clojure.data.json :as json]))
 
 
-(def ^:dynamic *validation-context*
+(def ^:dynamic *errors*
   "Allow validation errors to be captured."
   nil)
 
-(def ^:dynamic *parent*
-  "When walking an object, we keep a binding to current parent."
+(def ^:dynamic *path*
+  "When walking an object, we keep a binding to current path."
   nil)
 
 (def ^:dynamic process-errors
@@ -28,11 +28,9 @@
    context information to be used when reporting about errors. Nested
    contexts are just ignored."
   [& body]
-  `(let [body# #(do ~@body
-                    (process-errors @(:errors *validation-context*)))]
-     (if-not *validation-context*
-       (binding [*validation-context* {:errors (ref '())
-                                       :path (ref [])}]
+  `(let [body# #(do ~@body (process-errors @*errors*))]
+     (if-not *errors*
+       (binding [*errors* (atom '()) *path* []]
          (body#))
        (body#))))
 
@@ -40,27 +38,21 @@
 (defmacro walk-in
   "Step inside a relative path, from a previous object. This
    information is useful for reporting."
-  [parent rel-path & body]
-  `(binding [*parent* ~parent]
-     (if-let [{path# :path} *validation-context*]
-       (do
-         (dosync alter path# conj ~rel-path)
-         ~@body
-         (dosync alter path# pop))
-       (do ~@body))))
-
+  [_ rel-path & body]
+  `(binding [*path* (conj *path* ~rel-path)] ~@body))
 
 (defmacro invalid
   "Register an invalid piece of data according to schema."
   [& args]
   (let [[path args] (if (keyword? (first args))
                       [nil args] [(first args) (rest args)])
-        key (first args)
+        error (first args)
         data (second args)]
-    `(let [error# {:ref ~path :key ~key :data ~data}]
-       (if-let [{errors# :errors path# :path} *validation-context*]
-         (dosync (alter errors# conj
-                        (merge {:path (conj @path# ~path)} error#))))
+    `(let [error# (merge (when ~path {:ref ~path})
+                         (when ~error {:error ~error})
+                         (when ~data {:data ~data}))]
+       (when *errors*
+         (swap! *errors* conj (merge {:path (conj *path* ~path)} error#)))
        (process-errors (list error#)))))
 
 
@@ -118,18 +110,12 @@
 ;; If not, we pick one of the types (the first one, because why not?)
 ;; and put it through validation again to populate the error queue
 (defmethod validate* ::union [schema instance]
-  (let [current-errors #(count @(:errors *validation-context*))
-        error-counts (map #(binding [*validation-context* {:errors (ref '())
-                                                           :path (ref [])}]
-                             (validate % instance)
-                             {:error-count (current-errors)
-                              :errors @(:errors *validation-context*)
-                              :schema %})
-                          (:type schema))]
-    (when-not (some #(= 0 (:error-count %)) error-counts)
-      (let [errors (sort-by :error-count error-counts)]
-        (invalid :matches-no-type-in-union
-                 {:instance instance :errors (:errors (first errors))})))))
+  (let [errors (map #(binding [*errors* (atom '()) *path* []]
+                       (validate % instance) @*errors*)
+                    (:type schema))]
+    (when-not (some empty? errors)
+      (invalid :matches-no-type-in-union
+               {:instance instance :errors (first (sort-by count errors))}))))
 
 (def ^{:doc "Known basic types."}
      basic-type-validations
