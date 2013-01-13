@@ -50,9 +50,9 @@
         data (second args)]
     `(let [error# (merge (when ~path {:ref ~path})
                          (when ~error {:error ~error})
-                         (when ~data {:data ~data}))]
-       (when *errors*
-         (swap! *errors* conj (merge {:path (conj *path* ~path)} error#)))
+                         (when ~data {:data ~data})
+                         {:path (if ~path (conj *path* ~path) *path*)})]
+       (when *errors* (swap! *errors* conj error#))
        (process-errors (list error#)))))
 
 
