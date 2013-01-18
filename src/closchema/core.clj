@@ -208,36 +208,37 @@
   (common-validate schema instance)
 
   ;; specific array validation
-  (let [total (count instance)]
-    (do-template [key op]
-                 (if-let [expected (key schema)]
-                   (when (op total expected)
-                     (invalid key {:expected expected :actual total})))
-                 :minItems <
-                 :maxItems >))
+  (when (or (seq? instance) (vector? instance))
+    (let [total (count instance)]
+      (do-template [key op]
+                   (if-let [expected (key schema)]
+                     (when (op total expected)
+                       (invalid key {:expected expected :actual total})))
+                   :minItems <
+                   :maxItems >))
 
-  (if-let [unique? (:uniqueItems schema)]
-    (reduce (fn [l r] (when-not (= l r)
-                        (invalid :uniqueItems {:l l :r r}))
-              r) instance))
+    (if-let [unique? (:uniqueItems schema)]
+      (reduce (fn [l r] (when-not (= l r)
+                          (invalid :uniqueItems {:l l :r r}))
+                r) instance))
 
-  ;; treat array as object for further common validation
-  (when items-schema
-    (let [obj-array (if (and (coll? instance) (not (map? instance)))
-                      (zipmap (range (count instance)) instance)
-                      {0 instance})
-          obj-schema (cond (or (and (map? items-schema)
-                                    (:type items-schema))
-                               (:$ref items-schema))
-                           {:type "object"
-                            :additionalProperties items-schema}
+    ;; treat array as object for further common validation
+    (when items-schema
+      (let [obj-array (if (and (coll? instance) (not (map? instance)))
+                        (zipmap (range (count instance)) instance)
+                        {0 instance})
+            obj-schema (cond (or (and (map? items-schema)
+                                      (:type items-schema))
+                                 (:$ref items-schema))
+                             {:type "object"
+                              :additionalProperties items-schema}
 
-                           (vector? items-schema)
-                           (merge schema
-                                  {:type "object"
-                                   :properties (zipmap (range (count items-schema))
-                                                       items-schema)}))]
-      (validate obj-schema obj-array))))
+                             (vector? items-schema)
+                             (merge schema
+                                    {:type "object"
+                                     :properties (zipmap (range (count items-schema))
+                                                         items-schema)}))]
+        (validate obj-schema obj-array)))))
 
 
 (defmethod validate* :string

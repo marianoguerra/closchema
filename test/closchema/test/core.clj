@@ -334,3 +334,6 @@
 
 (deftest validate-type-integer-with-vector-input
          (is (not (validate {:type "integer" :minimum 0} [1 2 3]))))
+
+(deftest validate-type-array-with-number-input
+         (is (not (validate {:type "array" :items {:type "integer"}} 1))))
