@@ -208,7 +208,7 @@
   (common-validate schema instance)
 
   ;; specific array validation
-  (when (or (seq? instance) (vector? instance))
+  (when (sequential? instance)
     (let [total (count instance)]
       (do-template [key op]
                    (if-let [expected (key schema)]
